@@ -1,0 +1,54 @@
+name: Arreglar Gradle
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  arreglar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Corregir app build.gradle.kts
+        run: |
+          cat > app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+
+          android {
+              namespace = "com.orderhelper.app"
+              compileSdk = 35
+
+              defaultConfig {
+                  applicationId = "com.orderhelper.app"
+                  minSdk = 24
+                  targetSdk = 35
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+
+              compileOptions {
+                  sourceCompatibility = JavaVersion.VERSION_17
+                  targetCompatibility = JavaVersion.VERSION_17
+              }
+
+              kotlinOptions {
+                  jvmTarget = "17"
+              }
+          }
+          EOF
+
+      - name: Guardar corrección
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add app/build.gradle.kts
+          git commit -m "Configurar Java y Kotlin 17"
+          git push
