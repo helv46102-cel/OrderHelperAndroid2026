@@ -1,0 +1,136 @@
+name: Crear App Android
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  crear:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Crear proyecto Android
+        run: |
+          mkdir -p app/src/main/java/com/orderhelper/app
+          mkdir -p app/src/main/res/values
+          mkdir -p .github/workflows
+
+          cat > settings.gradle.kts <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+          rootProject.name = "OrderHelper"
+          include(":app")
+          EOF
+
+          cat > build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application") version "8.7.3" apply false
+              id("org.jetbrains.kotlin.android") version "2.0.21" apply false
+          }
+          EOF
+
+          cat > app/build.gradle.kts <<'EOF'
+          plugins {
+              id("com.android.application")
+              id("org.jetbrains.kotlin.android")
+          }
+
+          android {
+              namespace = "com.orderhelper.app"
+              compileSdk = 35
+
+              defaultConfig {
+                  applicationId = "com.orderhelper.app"
+                  minSdk = 24
+                  targetSdk = 35
+                  versionCode = 1
+                  versionName = "1.0"
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <application
+                  android:theme="@style/AppTheme"
+                  android:label="Order Helper">
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          cat > app/src/main/res/values/styles.xml <<'EOF'
+          <resources>
+              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+                  <item name="android:fontFamily">sans</item>
+              </style>
+          </resources>
+          EOF
+
+          cat > app/src/main/java/com/orderhelper/app/MainActivity.kt <<'EOF'
+          package com.orderhelper.app
+
+          import android.app.Activity
+          import android.os.Bundle
+          import android.view.Gravity
+          import android.widget.LinearLayout
+          import android.widget.TextView
+
+          class MainActivity : Activity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+
+                  val layout = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      gravity = Gravity.CENTER
+                      setPadding(40, 40, 40, 40)
+                  }
+
+                  val title = TextView(this).apply {
+                      text = "Order Helper"
+                      textSize = 30f
+                      gravity = Gravity.CENTER
+                  }
+
+                  val message = TextView(this).apply {
+                      text = "Aplicación instalada correctamente"
+                      textSize = 18f
+                      gravity = Gravity.CENTER
+                      setPadding(0, 30, 0, 0)
+                  }
+
+                  layout.addView(title)
+                  layout.addView(message)
+                  setContentView(layout)
+              }
+          }
+          EOF
+
+      - name: Guardar archivos en GitHub
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add .
+          git commit -m "Crear proyecto Android inicial"
+          git push
