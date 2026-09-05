@@ -1,0 +1,66 @@
+name: Poner Order Helper V2
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Cambiar pantalla de prueba
+        run: |
+          cat > app/src/main/java/com/orderhelper/app/MainActivity.kt <<'EOF'
+          package com.orderhelper.app
+
+          import android.app.Activity
+          import android.graphics.Color
+          import android.os.Bundle
+          import android.view.Gravity
+          import android.widget.LinearLayout
+          import android.widget.TextView
+
+          class MainActivity : Activity() {
+              override fun onCreate(savedInstanceState: Bundle?) {
+                  super.onCreate(savedInstanceState)
+
+                  val root = LinearLayout(this).apply {
+                      orientation = LinearLayout.VERTICAL
+                      gravity = Gravity.CENTER
+                      setBackgroundColor(Color.rgb(8, 12, 18))
+                  }
+
+                  val title = TextView(this).apply {
+                      text = "ORDER HELPER V2"
+                      textSize = 30f
+                      setTextColor(Color.rgb(120, 255, 50))
+                      gravity = Gravity.CENTER
+                  }
+
+                  val status = TextView(this).apply {
+                      text = "\nPRUEBA CORRECTA ✅"
+                      textSize = 20f
+                      setTextColor(Color.WHITE)
+                      gravity = Gravity.CENTER
+                  }
+
+                  root.addView(title)
+                  root.addView(status)
+                  setContentView(root)
+              }
+          }
+          EOF
+
+      - name: Guardar en main
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add app/src/main/java/com/orderhelper/app/MainActivity.kt
+          git commit -m "Prueba Order Helper V2"
+          git push origin HEAD:main
